@@ -43,6 +43,20 @@ def is_bad_exe(path: str) -> bool:
     return any(k in lower for k in BAD_KEYWORDS)
 
 
+def is_steam_game_icon(path: str) -> bool:
+    """
+    Detects Steam registry .ico entries like:
+    C:\Program Files (x86)\Steam\steam\games\<hash>.ico
+    """
+    if not path:
+        return False
+    lower = path.lower()
+    return (
+        "\\steam\\steam\\games\\" in lower
+        and lower.endswith(".ico")
+    )
+
+
 def safe_reg_get(key, value_name):
     try:
         val, _ = winreg.QueryValueEx(key, value_name)
@@ -185,6 +199,11 @@ def scan_registry():
                     continue
 
                 icon = safe_reg_get(subkey, "DisplayIcon")
+
+                # 🚫 Skip Steam game .ico registry entries
+                if icon and is_steam_game_icon(icon):
+                    continue
+
                 install_location = safe_reg_get(subkey, "InstallLocation")
 
                 exe = None
