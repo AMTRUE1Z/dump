@@ -28,6 +28,9 @@ BAD_KEYWORDS = [
     "redistributable", "runtime"
 ]
 
+DUMP_DIR = "dump"
+DUMP_FILE = "installed_apps.txt"
+
 
 # ======================================================
 # HELPERS
@@ -238,24 +241,20 @@ def parse_steam_libraryfolders(library_file):
     try:
         with open(library_file, "r", encoding="utf-8", errors="ignore") as f:
             text = f.read()
-        # Very naive parse: look for "path" "X:\SteamLibrary"
         for line in text.splitlines():
             line = line.strip()
             if '"path"' in line:
                 parts = line.split('"')
-                # e.g. "path" "D:\\SteamLibrary"
                 if len(parts) >= 4:
                     path = parts[3].replace("\\\\", "\\")
                     libraries.append(path)
     except Exception:
         pass
 
-    # Always include main Steam root
     root_common = os.path.join(STEAM_ROOT, "steamapps")
     if os.path.isdir(root_common) and root_common not in libraries:
         libraries.append(root_common)
 
-    # Convert to steamapps paths
     final = []
     for lib in libraries:
         sa = os.path.join(lib, "steamapps")
@@ -265,9 +264,6 @@ def parse_steam_libraryfolders(library_file):
 
 
 def parse_steam_acf(acf_path):
-    """
-    Very naive ACF parser: just enough to get appid, name, installdir.
-    """
     data = {}
     try:
         with open(acf_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -316,7 +312,6 @@ def scan_steam():
 
             add_entry(apps, name, steam_uri, "steam", alt_exe=alt_exe)
 
-    # Also add Steam client itself if present
     steam_exe = os.path.join(STEAM_ROOT, "steam.exe")
     if os.path.isfile(steam_exe):
         add_entry(apps, "Steam", steam_exe, "steam_client")
@@ -360,7 +355,6 @@ def scan_epic():
 
         add_entry(apps, name, epic_uri, "epic", alt_exe=alt_exe)
 
-    # Epic Games Launcher itself
     possible_paths = [
         r"C:\Program Files (x86)\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe",
         r"C:\Program Files (x86)\Epic Games\Launcher\Engine\Binaries\Win64\EpicGamesLauncher.exe"
@@ -508,10 +502,14 @@ def scan_all():
     return all_apps
 
 
+# ======================================================
+# EXECUTION + JSON DUMP
+# ======================================================
+
 if __name__ == "__main__":
     apps = scan_all()
 
-    # Human-readable preview
+    # Human preview
     print("\n=== FINAL APPS/GAMES (PREVIEW) ===\n")
     for app in apps:
         name = app["name"]
@@ -523,5 +521,11 @@ if __name__ == "__main__":
         else:
             print(f"{src:12} | {name} -> {exe}")
 
-    # JSON output for main.py (last line only)
-    print(json.dumps(apps, indent=4))
+    # Ensure dump folder exists
+    if not os.path.isdir(DUMP_DIR):
+        os.makedirs(DUMP_DIR)
+
+    # Write JSON to dump/installed_apps.txt
+    dump_path = os.path.join(DUMP_DIR, DUMP_FILE)
+    with open(dump_path, "w", encoding="utf-8") as f:
+        json.dump(apps, f, indent=4)
