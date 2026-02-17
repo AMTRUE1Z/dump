@@ -16,6 +16,8 @@ import time
 import re
 from datetime import datetime
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 if "--allow-launch" not in sys.argv:
     raise SystemExit("This program must be launched through the bootstrapper.")
 
@@ -34,8 +36,8 @@ GITHUB_RAW_SCANNER_URL = (
     "https://raw.githubusercontent.com/AMTRUE1Z/dump/refs/heads/main/scanner.py"
 )
 
-SCANNER_FILENAME = "scanner.py"
-DUMP_DIR = "dump"
+SCANNER_FILENAME = os.path.join(os.getcwd(), "scanner.py")
+DUMP_DIR = os.path.join(os.getcwd(), "dump")
 CUSTOM_APPS_FILE = "custom_apps.txt"
 
 # conversational default model (dropdown default)
