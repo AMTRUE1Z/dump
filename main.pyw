@@ -72,7 +72,7 @@ def download_scanner():
 def run_scanner_silently(console=None):
     try:
         subprocess.run(
-            [sys.executable, SCANNER_FILENAME],
+            [sys.executable, SCANNER_FILENAME, "--allow-scan"],
             capture_output=True,
             text=True
         )
