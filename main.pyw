@@ -34,8 +34,9 @@ GITHUB_RAW_SCANNER_URL = (
     "https://raw.githubusercontent.com/AMTRUE1Z/dump/refs/heads/main/scanner.py"
 )
 
-SCANNER_FILENAME = "scanner.py"
-DUMP_DIR = "dump"
+SCANNER_FILENAME = os.path.join("bin", "scanner.py")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DUMP_DIR = os.path.join(BASE_DIR, "dump")
 CUSTOM_APPS_FILE = "custom_apps.txt"
 
 # conversational default model (dropdown default)
